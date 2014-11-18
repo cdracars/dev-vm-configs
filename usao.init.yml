@@ -1,0 +1,36 @@
+- name: ensure bitbucket.org is a known host
+  lineinfile:
+    dest: ~/.ssh/known_hosts
+    create: yes
+    state: present
+    line: "{{ lookup('pipe', 'ssh-keyscan -t rsa bitbucket.org') }}"
+    regexp: "^bitbucket\\.org"
+  sudo: no
+
+- name: ensure github.com is a known host
+  lineinfile:
+    dest: ~/.ssh/known_hosts
+    create: yes
+    state: present
+    line: "{{ lookup('pipe', 'ssh-keyscan -t rsa github.com') }}"
+    
+regexp: "^github\\.com"
+  sudo: no
+
+# SSH agent forwarding for deploy user.
+- name: send private key to remote deploy user
+  copy:
+    src: '~/.ssh/id_rsa'
+    dest: "/home/vagrant/.ssh/id_rsa"
+  sudo: no
+
+- name: send public key to remote deploy user
+  copy:
+    src: '~/.ssh/id_rsa.pub'
+    dest: "/home/vagrant/.ssh/id_rsa.pub"
+  sudo: no
+
+- name: Get software for drupal make file.
+  apt: "pkg={{ item }} state=installed"
+  with_items:
+  - zip
